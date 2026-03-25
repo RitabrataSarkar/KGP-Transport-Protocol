@@ -63,15 +63,16 @@ Building the Project
 Clone the repository and compile the background daemon and static library:
 Bash
 
-make all
+      make all
 
 Running the Protocol
 
     Start the Kernel Daemon:
     The daemon must be running in the background to manage the shared memory and actual network interfaces.
-    Bash
 
-make runinit
+Bash
+
+      make runinit
 
 Run the User Applications:
 In a separate terminal, start the user applications to test file transfer:
@@ -82,9 +83,10 @@ Bash
 🧪 Testing Network Unreliability
 
 The protocol's resilience can be tested by tweaking the packet drop probability. In ksocket.h, modify the macro P:
+
 C
 
-#define P 0.15 // 15% chance of dropping a packet
+      #define P 0.15 // 15% chance of dropping a packet
 
 Recompile and run to observe the Sender Thread handling timeouts and Go-Back-N retransmissions.
 👥 Authors
