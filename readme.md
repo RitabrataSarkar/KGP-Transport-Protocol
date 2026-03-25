@@ -70,7 +70,6 @@ Running the Protocol
     Start the Kernel Daemon:
     The daemon must be running in the background to manage the shared memory and actual network interfaces.
 
-Bash
 
     make runinit
 
@@ -84,7 +83,6 @@ Bash
 
 The protocol's resilience can be tested by tweaking the packet drop probability. In ksocket.h, modify the macro P:
 
-C
 
     #define P 0.15 // 15% chance of dropping a packet
 
