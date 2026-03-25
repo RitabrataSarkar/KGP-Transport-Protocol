@@ -47,6 +47,7 @@ graph TD
     
     TS -->|sendto| UDP
     UDP -->|recvfrom| TR
+```
 
 🛠️ Getting Started
 Prerequisites
