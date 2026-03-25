@@ -61,7 +61,6 @@ Prerequisites
 Building the Project
 
 Clone the repository and compile the background daemon and static library:
-Bash
 
     make all
 
@@ -86,6 +85,7 @@ The protocol's resilience can be tested by tweaking the packet drop probability.
     #define P 0.15 // 15% chance of dropping a packet
 
 Recompile and run to observe the Sender Thread handling timeouts and Go-Back-N retransmissions.
+
 👥 Authors
 
     Hritwik Upadhyay (23CS30023)
