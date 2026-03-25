@@ -1,0 +1,71 @@
+CS39006 Mini Project 1: Reliable Flow Control over Unreliable Channels
+Group Details:
+Member 1 Name: Hritwik Upadhyay
+Member 1 Roll number: 23CS30023
+Member 2 Name: Ritabrata Sarkar
+Member 2 Roll Number: 23CS30045
+
+1. EXPERIMENTAL FINDINGS (Probability vs. Average Transmissions)
+
+File Size: ~120 KB 
+Timeout (T): 5 seconds
+Protocol: Sliding Window (Go-Back-N)
+
+Because this protocol implements a Go-Back-N sliding window, the average number of transmissions scales non-linearly. A single dropped packet at the base of the window triggers the retransmission of all subsequent packets currently in the flight window.
+
+Drop Probability (p) | Observed Avg. Transmissions per Message
+0.05                 | 1.250                                  
+0.10                 | 1.551                                  
+0.15                 | 1.954                                  
+0.20                 | 2.502                                  
+0.25                 | 3.597                                  
+0.30                 | 5.531                                  
+0.35                 | 6.804                                  
+0.40                 | 8.109                                  
+0.45                 | 9.052                                  
+0.50                 | 9.966                               
+
+2. DATA STRUCTURES (ksocket.h)
+
+The protocol uses a Shared Memory architecture where the daemon and user processes communicate through a shared array of Protocol Control Blocks (PCBs).
+
+* ktp_buffer_slot_t
+  Represents a single 512-byte payload slot in the inbox or outbox.
+  - payload: The actual 512-byte data segment.
+  - is_occupied: Boolean flag indicating if the slot is in use.
+  - tx_time: Timestamp of when the packet was sent (used for timeouts).
+
+* ktp_window_t
+  Manages the sliding window state for flow control.
+  - window_base: The 8-bit sequence number of the oldest unacknowledged packet.
+  - current_size: The number of free spaces currently in the window.
+  - expected_seq: Array tracking expected 8-bit sequence numbers.
+  - slot_status: Boolean array tracking which sequence numbers have been ACKed.
+
+* ktp_pcb_t
+  The master structure for a single KTP socket connection.
+  - owner_pid: Process ID of the user application (used by Garbage Collector).
+  - udp_sockfd: The actual Linux UDP socket file descriptor.
+  - tx_buffer / rx_buffer: Arrays of ktp_buffer_slot_t holding the messages.
+  - swnd / rwnd: The Sender and Receiver window states.
+  - rx_buffer_full: Flag indicating the "nospace" condition to the receiver.
+  - is_teardown_initiated: Triggers the graceful teardown sequence.
+
+3. FUNCTION DESCRIPTIONS
+
+User Library Functions (ksocket.c):
+* k_socket(): Attaches to shared memory, finds a free socket block, and initializes the buffers and window sizes. Returns the array index as the KTP socket ID.
+* k_bind(): Stores the source and destination IP and Port in the socket block. The background daemon detects this and performs the actual UDP bind.
+* k_sendto(): Checks if the destination matches the bound IP. If the outbox has space, it copies the payload in and marks it for the daemon to send.
+* k_recvfrom(): Checks the inbox. If data exists, it copies it to the user application and shifts the remaining buffer array forward to maintain strict FIFO ordering.
+* k_close(): Sets a teardown flag. The daemon sees this, finishes sending any pending messages, and closes the socket gracefully.
+    
+* attach_shared_memory(): Internal helper that locates the shared memory block created by the initk daemon and attaches it to the user application's address space.
+* get_socket_lock(): Internal helper that opens the specific POSIX named semaphore for a given socket index to prevent race conditions during read/write operations.
+
+* dropMessage(): Simulates an unreliable network by generating a random float. It returns 1 (drop) if the random number is less than the defined probability P, and 0 otherwise.
+
+Kernel Daemon Functions (initksocket.c):
+* threadR() [Receiver]: Uses the select() system call to multiplex incoming UDP traffic. It extracts headers, handles Go-Back-N duplicate drops, updates the receive window, and sends Acknowledgements back to the sender.
+* threadS() [Sender]: The engine of the protocol. It periodically checks the outbox for timeouts. If a timeout occurs, it retransmits. It also handles sending fresh data.
+* threadG() [Garbage Collector]: Wakes up every T seconds and uses the kill() system call with signal 0 to ping the user processes. If a process crashed without calling k_close(), it reclaims the shared memory slot to prevent memory leaks.

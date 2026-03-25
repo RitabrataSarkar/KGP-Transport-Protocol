@@ -1,0 +1,12 @@
+# Compiled Object files
+*.o
+*.a
+
+# Executables
+initk
+u1
+u2
+
+# Test Data Output
+recv_file.txt
+send_file.txt
