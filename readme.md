@@ -75,7 +75,6 @@ The daemon must be running in the background to manage the shared memory and act
 
 Run the User Applications:
 In a separate terminal, start the user applications to test file transfer:
-Bash
 
     make runuser
 
