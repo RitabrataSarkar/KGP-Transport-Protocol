@@ -63,7 +63,7 @@ Building the Project
 Clone the repository and compile the background daemon and static library:
 Bash
 
-      make all
+    make all
 
 Running the Protocol
 
@@ -72,7 +72,7 @@ Running the Protocol
 
 Bash
 
-      make runinit
+    make runinit
 
 Run the User Applications:
 In a separate terminal, start the user applications to test file transfer:
@@ -86,7 +86,7 @@ The protocol's resilience can be tested by tweaking the packet drop probability.
 
 C
 
-      #define P 0.15 // 15% chance of dropping a packet
+    #define P 0.15 // 15% chance of dropping a packet
 
 Recompile and run to observe the Sender Thread handling timeouts and Go-Back-N retransmissions.
 👥 Authors
