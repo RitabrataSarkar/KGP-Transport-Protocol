@@ -67,8 +67,8 @@ Bash
 
 Running the Protocol
 
-    Start the Kernel Daemon:
-    The daemon must be running in the background to manage the shared memory and actual network interfaces.
+Start the Kernel Daemon:
+The daemon must be running in the background to manage the shared memory and actual network interfaces.
 
 
     make runinit
